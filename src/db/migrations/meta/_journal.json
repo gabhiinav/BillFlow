@@ -15,6 +15,20 @@
       "when": 1741093121547,
       "tag": "0001_unknown_gamora",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741111691080,
+      "tag": "0002_icy_stellaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1741112336144,
+      "tag": "0003_white_skaar",
+      "breakpoints": true
     }
   ]
 }

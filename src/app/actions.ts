@@ -9,7 +9,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function createAction(formData: FormData) {
-  const {userId} = auth();
+  const {userId, orgId } = await auth();
   const value = Math.floor(parseFloat(String(formData.get("value"))) * 100);
   const description = formData.get("description") as string;
 
@@ -70,6 +70,7 @@ export async function updateStatusAction(formData: FormData) {
 
 export async function deleteInvoiceAction(formData: FormData) {
   const { userId, orgId } = auth();
+
 
   if ( userId !== process.env.ME_ID ) return;
 
