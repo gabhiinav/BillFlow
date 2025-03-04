@@ -26,3 +26,7 @@ export async function createAction(formData: FormData) {
 
   redirect(`/invoices/${results[0].id}`);
 }
+
+export async function updateStatusAction(formData: FormData) {
+  
+}
