@@ -5,12 +5,18 @@ import { cn } from "@/lib/utils";
 
 import { eq } from "drizzle-orm";
 
+import { notFound } from "next/navigation";
+
 export default async function InvoicePage({
   params,
 }: {
   params: { invoiceId: string };
 }) {
   const invoiceId = parseInt(params.invoiceId);
+
+  if (isNaN(invoiceId)){
+    throw new Error("Invalid Invoice ID");
+  }
 
   const [result] = await db
     .select()
@@ -19,6 +25,10 @@ export default async function InvoicePage({
     .limit(1);
 
   console.log("result", result);
+
+  if (!result) {
+    notFound();
+  }
   return (
     <main className="h-full max-w-5xl mx-auto my-12">
       <div className="flex justify-between mb-8">
