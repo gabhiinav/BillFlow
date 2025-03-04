@@ -10,16 +10,27 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Container from "@/components/Container"
+import Container from "@/components/Container";
 import { CirclePlus } from "lucide-react";
 
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 import { cn } from "@/lib/utils";
 
+import { auth } from "@clerk/nextjs/server";
+
 export default async function Home() {
-  const results = await db.select().from(Invoices);
+  const { userId } = auth();
+
+  if (!userId) {
+    return;
+  }
+  const results = await db
+    .select()
+    .from(Invoices)
+    .where(eq(Invoices.userId, userId));
   console.log(results);
   return (
     <main className="h-full my-12">

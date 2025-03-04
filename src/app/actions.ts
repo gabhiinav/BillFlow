@@ -18,6 +18,7 @@ export async function createAction(formData: FormData) {
   const results = await db.insert(Invoices).values({
     value,
     description,
+    userId
     status: "open",
   }).returning({
     id: Invoices.id,
