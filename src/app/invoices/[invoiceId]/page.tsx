@@ -1,17 +1,19 @@
-import { auth } from "@clerk/nextjs/server";
-import { and, eq, isNull } from "drizzle-orm";
 import { notFound } from "next/navigation";
+
+import { auth } from "@clerk/nextjs/server";
 
 import { db } from "@/db";
 import { Customers, Invoices } from "@/db/schema";
-import Invoice from "./Invoice";
+import { eq } from "drizzle-orm";
+
+import Invoice from "@/app/invoices/[invoiceId]/Invoice";
 
 export default async function InvoicePage({
   params,
 }: {
   params: { invoiceId: string };
 }) {
-  const { userId, orgId } = auth();
+  const { userId, orgId } = await auth();
 
   if (!userId) return;
 

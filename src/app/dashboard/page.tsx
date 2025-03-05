@@ -1,4 +1,14 @@
+import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+
+import { db } from "@/db";
+
+import { Customers, Invoices } from "@/db/schema";
+import { and, eq, isNull } from "drizzle-orm";
+
+import Container from "@/components/Container";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -8,35 +18,50 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import Container from "@/components/Container";
 import { CirclePlus } from "lucide-react";
-
-import { db } from "@/db";
-import { Invoices } from "@/db/schema";
-import { eq } from "drizzle-orm";
-
 import { cn } from "@/lib/utils";
 
-import { auth } from "@clerk/nextjs/server";
-
 export default async function Home() {
-  const { userId } = auth();
+  const { userId, orgId } = await auth();
 
-  if (!userId) {
-    return;
-  }
-  const results = await db
+  if (!userId) return;
+
+  // // Displaying all invoices for public demo
+
+  let results: Array<{
+    invoices: typeof Invoices.$inferSelect;
+    customers: typeof Customers.$inferSelect;
+  }> = await db
     .select()
     .from(Invoices)
-    .where(eq(Invoices.userId, userId));
-  console.log(results);
+    .innerJoin(Customers, eq(Invoices.customerId, Customers.id));
+
+  if (orgId) {
+    results = await db
+      .select()
+      .from(Invoices)
+      .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+      .where(eq(Invoices.organizationId, orgId));
+  } else {
+    results = await db
+      .select()
+      .from(Invoices)
+      .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+      .where(and(eq(Invoices.userId, userId), isNull(Invoices.organizationId)));
+  }
+
+  const invoices = results?.map(({ invoices, customers }) => {
+    return {
+      ...invoices,
+      customer: customers,
+    };
+  });
+
   return (
-    <main className="h-full my-12">
+    <main className="h-full">
       <Container>
         <div className="flex justify-between mb-6">
-          <h1 className="text-3xl font-bold">Invoices</h1>
+          <h1 className="text-3xl font-semibold">Invoices</h1>
           <p>
             <Button className="inline-flex gap-2" variant="ghost" asChild>
               <Link href="/invoices/new">
@@ -58,7 +83,7 @@ export default async function Home() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {results.map((result) => {
+            {invoices.map((result) => {
               return (
                 <TableRow key={result.id}>
                   <TableCell className="font-medium text-left p-0">
@@ -66,7 +91,7 @@ export default async function Home() {
                       href={`/invoices/${result.id}`}
                       className="block p-4 font-semibold"
                     >
-                      {new Date(result.createTs).toLocaleDateString("en-GB")}
+                      {new Date(result.createTs).toLocaleDateString()}
                     </Link>
                   </TableCell>
                   <TableCell className="text-left p-0">
@@ -74,12 +99,12 @@ export default async function Home() {
                       href={`/invoices/${result.id}`}
                       className="block p-4 font-semibold"
                     >
-                      Maya Brooke
+                      {result.customer.name}
                     </Link>
                   </TableCell>
                   <TableCell className="text-left p-0">
                     <Link className="block p-4" href={`/invoices/${result.id}`}>
-                      mayabr@dev.com
+                      {result.customer.email}
                     </Link>
                   </TableCell>
                   <TableCell className="text-center p-0">
@@ -90,7 +115,7 @@ export default async function Home() {
                           result.status === "open" && "bg-blue-500",
                           result.status === "paid" && "bg-green-600",
                           result.status === "void" && "bg-zinc-700",
-                          result.status === "uncollectable" && "bg-red-600"
+                          result.status === "uncollectible" && "bg-red-600"
                         )}
                       >
                         {result.status}

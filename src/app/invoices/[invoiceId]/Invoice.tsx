@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import Container from "@/components/Container";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,10 +20,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import { ChevronDown, CreditCard, Ellipsis, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import type { Customers, Invoices } from "@/db/schema";
-import { cn } from "@/lib/utils";
 import { AVAILABLE_STATUSES } from "@/data/invoices";
 
 import { deleteInvoiceAction, updateStatusAction } from "@/app/actions";
